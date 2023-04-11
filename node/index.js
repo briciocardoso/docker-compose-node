@@ -1,5 +1,6 @@
 const express = require('express');
 const mysql = require('mysql');
+const { uniqueNamesGenerator, names, starWars } = require('unique-names-generator');
 const app = express();
 const port = 3000;
 const dbConfig = {
@@ -19,6 +20,13 @@ function createConnection() {
   console.log('Conexão MySQL obtida com sucesso');
 
   return connection;
+}
+
+function createUniqueName() {
+  const generatorConfig = {
+    dictionaries: [names, starWars]
+  };
+  return uniqueNamesGenerator(generatorConfig);
 }
 
 app.get('/', (req, res) => {
