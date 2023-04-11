@@ -1,0 +1,44 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql-server
+    restart: always
+    tty: true
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=nodedb
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - localnet
+
+  node:
+    build:
+      context: ./node
+    container_name: node-server
+    tty: true
+    volumes:
+      - ./node:/usr/src/app
+    ports:
+    - "3000:3000"
+    networks:
+      - localnet
+    entrypoint: dockerize -wait tcp://mysql-server:3306 -timeout 40s node index.js
+    depends_on:
+      - mysql
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: nginx-server
+    networks:
+      - localnet
+    ports:
+      - "8080:80"
+    depends_on:
+      - node
+
+networks:
+  localnet:
+    driver: bridge
